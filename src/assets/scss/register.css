@@ -1,0 +1,72 @@
+@media (min-width: 760px) and (max-width: 992px) {
+  img {
+    height: 40px;
+  }
+  /* #partApp2{
+    display: none;
+  } */
+}
+
+@media (min-width: 992px) and (max-width: 1200px) {
+  img {
+    height: 40px;
+  }
+  #partApp2{
+    display: none;
+  }
+}
+@media (min-width: 1200px) and (max-width: 1920px) {
+  .register_form {
+    width: 59%;
+  }
+  img {
+    height: 40px;
+  }
+  #partApp2{
+    display: none;
+  }
+}
+@media (max-width: 1400px) {
+  .register_form {
+    width: 100%;
+  }
+  .logo{
+    margin-bottom: 0px !important;
+  }
+  .card{
+    margin-top: 0px !important;
+  }
+  #partApp2{
+    display: none;
+  }
+  
+}
+
+@media (min-width: 1920px) {
+    img {
+        height: 50px;
+      }
+      #partApp2{
+        display: none;
+      }
+}
+@media only screen and (max-width: 760px),
+  (min-device-width: 768px) and (max-device-width: 1024px) {
+  .logo {
+    margin-bottom: 0px !important;
+  }
+  img {
+    height: 40px;
+  }
+  .register_form {
+    margin-top: 0px !important;
+  }
+  #partApp{
+    display: none;
+    /* visibility: hidden; */
+  } 
+  #partApp2{
+    display: block;
+  }
+
+}
