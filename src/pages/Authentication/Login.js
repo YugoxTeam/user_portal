@@ -70,7 +70,7 @@ const Login = (props) => {
     }),
     onSubmit: (values, action) => {
       setLoading(true);
-      // if (captchaValue) {
+      if (captchaValue) {
         const headers = {
           "Content-Type": "application/form-data",
         };
@@ -120,10 +120,10 @@ const Login = (props) => {
           .catch((error) => {
             console.log(error);
           });
-      // }
-      //  else {
-        // setLoading(false);
-      // }
+      }
+       else {
+        setLoading(false);
+      }
     },
   });
 
