@@ -58,40 +58,6 @@ export const loginUser = (user, history) => async (dispatch) => {
 
 export const logoutUser = () => async (dispatch) => {
   try {
-    // if (value) {
-    //   const headers = {
-    //     "Content-Type": "application/json",
-    //     Authorization: `Basic ${btoa(`${value.emailId}:${value.password}`)}`,
-    //   };
-
-    //   var formdata = new FormData();
-    //   formdata.append("_operation", "PortalLog");
-    //   formdata.append("username", value.emailId);
-    //   formdata.append("password", value.password);
-    //   formdata.append("token", localStorage.getItem("token"));
-    //   formdata.append("cf_3297", "Logout Success");
-
-    //   let data = {};
-    //   formdata.forEach(function (value, key) {
-    //     data[key] = value;
-    //   });
-
-    //   axios({
-    //     method: "post",
-    //     headers: headers,
-    //     url: REACT_APP_API_URL,
-    //     data: JSON.stringify(data),
-    //   })
-    //     .then((res) => {
-    //       if (res.status == 200) {
-    //         localStorage.clear();
-    //         // <Navigate to="/login" />;
-    //       }
-    //     })
-    //     .catch((error) => {
-    //       console.log(error);
-    //     });
-    // }
     localStorage.clear()
     let fireBaseBackend = getFirebaseBackend();
     if (process.env.REACT_APP_DEFAULTAUTH === "firebase") {

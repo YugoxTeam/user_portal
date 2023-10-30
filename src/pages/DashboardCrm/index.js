@@ -11,7 +11,7 @@ import UpcomingActivities from './UpcomingActivities';
 import Widgets from './Widgets';
 import { useEffect } from 'react';
 const DashboardCrm = () => {
-    document.title="Ridge Security Dashboard";
+    document.title="Dashboard";
     return (
         <React.Fragment>
             <div className="page-content">

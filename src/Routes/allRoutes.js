@@ -1,8 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 
-//Dashboard
-import DashboardAnalytics from "../pages/DashboardAnalytics";
 
 //AuthenticationInner pages
 import BasicSignIn from "../pages/AuthenticationInner/Login/BasicSignIn";
@@ -40,21 +38,16 @@ import Login from "../pages/Authentication/Login";
 import ForgetPasswordPage from "../pages/Authentication/ForgetPassword";
 import Logout from "../pages/Authentication/Logout";
 import Register from "../pages/Authentication/Register";
-
+import Dashboard from "../pages/DashboardCrm";
+import File from "../pages/FileUploader/File";
 // User Profile
-import UserProfile from "../pages/Authentication/user-profile";
 const authProtectedRoutes = [
   //components
 
-  { path: "/dashboard", component: <DashboardAnalytics /> },
+  { path: "/dashboard", component: <Dashboard/> },
+  { path: "/upload", component: <File /> },
 
   { path: "/pages-profile-settings", component: <Settings /> },
-
-  //User Profile
-  { path: "/profile", component: <UserProfile /> },
-
-  // this route should be at the end of all other routes
-  // eslint-disable-next-line react/display-name
   {
     path: "/",
     exact: true,
