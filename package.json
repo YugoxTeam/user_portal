@@ -55,7 +55,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build --href=./vtigerportal/",
+    "build": "react-scripts build --href=./fileupload/",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

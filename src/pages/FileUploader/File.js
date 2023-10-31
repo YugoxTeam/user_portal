@@ -67,26 +67,68 @@ const File = () => {
     return `${originalFilename}_${chunkIndex}.${fileExtension}`;
   };
 
-  // const uploadDoc = () => {
-  //   if (selectedFiles && selectedFiles.length > 0) {
-  //     const fileSize = selectedFiles[0].size;
-  //     const chunkSize = 50 * 1024 * 1024; // 50MB
-  //     const totalChunks = Math.ceil(fileSize / chunkSize);
-
-  //     for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-  //       const start = chunkIndex * chunkSize;
-  //       const end = Math.min(start + chunkSize, fileSize);
-  //       const chunk = selectedFiles[0].slice(start, end);
-  //       const uniqueFilename = generateUniqueFilename(
-  //         selectedFiles[0].name,
-  //         chunkIndex
-  //       );
-  //       // Send the chunk to the server using fetch or any other method
-  //       uploadChunk(chunk, chunkIndex, totalChunks, uniqueFilename);
-  //     }
-  //   }
-  // };
   const uploadChunk = (chunk, chunkIndex, totalChunks, uniqueFilename) => {
+    // const formData = new FormData();
+    // formData.append("file", chunk);
+    // formData.append("chunkIndex", chunkIndex);
+    // formData.append("totalChunks", totalChunks);
+    // formData.append("uniqueFilename", uniqueFilename);
+    // formData.append("folderName", folder_name);
+
+    // // Create the fetch options
+    // const fetchOptions = {
+    //   method: "POST",
+    //   body: formData,
+    //   // credentials: "include", // Equivalent to withCredentials: true
+    // };
+
+    // // Replace this with your server endpoint for handling file chunks
+    // fetch("https://demo.crmexperts.in/file_upload/index.php", fetchOptions)
+    //   .then((response) => {
+    //     if (!response.ok) {
+    //       throw new Error("Network response was not ok");
+    //     }
+    //     const contentLength = response.headers.get("content-length");
+    //     if (!contentLength) {
+    //       throw new Error("Content-Length header is missing in the response");
+    //     }
+
+    //     // Create a ReadableStream from the response body
+    //     const reader = response.body.getReader();
+    //     let loaded = 0;
+    //     const total = parseInt(contentLength, 10);
+
+    //     // Process the response data and calculate progress
+    //     function processResponse({ done, value }) {
+    //       if (done) {
+    //         // Finished processing
+    //         return;
+    //       }
+
+    //       loaded += value.length;
+    //       const progressPercentage = Math.round((loaded * 100) / total);
+
+    //       // Update progress using the progressPercentage
+    //       setProgress(progressPercentage);
+    //       setChunks((prevChunks) =>
+    //         prevChunks.map((chunk, index) =>
+    //           index === chunkIndex
+    //             ? { ...chunk, progress: progressPercentage }
+    //             : chunk
+    //         )
+    //       );
+
+    //       // Continue processing the response data
+    //       return reader.read().then(`processResponse`);
+    //     }
+
+    //     // Start processing the response data
+    //     reader.read().then(processResponse);
+    //   })
+    //   .catch((error) => {
+    //     // Handle errors
+    //   });
+
     const formData = new FormData();
     formData.append("file", chunk);
     formData.append("chunkIndex", chunkIndex);
@@ -95,7 +137,7 @@ const File = () => {
     formData.append("folderName", folder_name);
     // You can replace this with your server endpoint for handling file chunks
     axios
-      .post("http://localhost/upload.php", formData, {
+      .post("https://demo.crmexperts.in/file_upload/index.php", formData, {
         onUploadProgress: (progressEvent) => {
           const progressPercentage = Math.round(
             (progressEvent.loaded * 100) / progressEvent.total
@@ -134,7 +176,10 @@ const File = () => {
       // );
       setChunks(
         Array.from({ length: totalChunks }, (_, index) => {
-          const chunk = selectedFiles[0].slice(index * chunkSize, Math.min((index + 1) * chunkSize, fileSize));
+          const chunk = selectedFiles[0].slice(
+            index * chunkSize,
+            Math.min((index + 1) * chunkSize, fileSize)
+          );
           return {
             filename: generateUniqueFilename(selectedFiles[0].name, index),
             progress: 0,
@@ -142,7 +187,7 @@ const File = () => {
           };
         })
       );
-      
+
       for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
         const start = chunkIndex * chunkSize;
         const end = Math.min(start + chunkSize, fileSize);
@@ -153,10 +198,29 @@ const File = () => {
           chunkIndex
         );
         uploadChunk(chunk, chunkIndex, totalChunks, uniqueFilename);
+        // saveChunkLocally(chunk,chunkIndex,uniqueFilename)
       }
     }
   };
 
+  const saveChunkLocally = (chunk, chunkIndex, customFileName) => {
+    const fileReader = new FileReader();
+    fileReader.onload = function (event) {
+      const chunkData = event.target.result;
+      const blob = new Blob([chunkData]);
+      const chunkFileName = `${customFileName}.dat`;
+
+      const downloadLink = document.createElement("a");
+      downloadLink.href = URL.createObjectURL(blob);
+      downloadLink.download = chunkFileName;
+      downloadLink.style.display = "none";
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    };
+
+    fileReader.readAsArrayBuffer(chunk);
+  };
   return (
     <React.Fragment>
       <div className="page-content">
