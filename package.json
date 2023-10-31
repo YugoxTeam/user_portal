@@ -2,8 +2,8 @@
   "name": "default-velzon-thunk",
   "version": "2.4.0",
   "private": true,
-  "homepage": "https://portal.ridgesecurity.ai/",
-  "dependencies": {
+  "homepage": "/fileupload",
+   "dependencies": {
     "@cyntler/react-doc-viewer": "^1.14.0",
     "@reduxjs/toolkit": "^1.9.1",
     "@testing-library/jest-dom": "^5.16.5",
@@ -54,7 +54,7 @@
     "yup": "^0.32.11"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "set HTTPS=true&&react-scripts start",
     "build": "react-scripts build --href=./fileupload/",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

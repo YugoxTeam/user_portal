@@ -971,9 +971,9 @@ const Settings = () => {
                             </Label>
                           </div>
                         </div>
-                        <h5 className="fs-16 mb-1">Test</h5>
+                        <h5 className="fs-16 mb-1">Astr</h5>
                         <p className="text-muted mb-0">
-                          Lead Designer / Developer
+                          Designer
                         </p>
                       </div>
                     {/* );

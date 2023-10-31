@@ -232,7 +232,7 @@ const ProfileDropdown = () => {
                     </DropdownItem > */}
           <DropdownItem className="p-0">
             <Link
-              to={process.env.PUBLIC_URL + "/pages-profile-settings"}
+              to={"/pages-profile-settings"}
               className="dropdown-item"
             >
               {/* <span className="badge bg-soft-success text-success mt-1 float-end">New</span> */}

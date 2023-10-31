@@ -22,7 +22,8 @@ const File = () => {
   const [chunks, setChunks] = useState([]);
   const [totalChunks, setTotalChunks] = useState(0);
   const [uploading, setUploading] = useState(false);
-
+  const [check, setCheck] = useState(false);
+  const [loading, setLoading] = useState(true);
   const folder_name = Date.now();
   function formatBytes(bytes, decimals = 2) {
     if (bytes === 0) return "0 Bytes";
@@ -34,13 +35,21 @@ const File = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
   }
   function handleAcceptedFiles(files) {
-    files.map((file) =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file),
-        formattedSize: formatBytes(file.size),
-      })
-    );
-    setselectedFiles(files);
+    if (files && files.length > 0 && files[0]["type"] == "text/csv") {
+      files.map((file) =>
+        Object.assign(file, {
+          preview: URL.createObjectURL(file),
+          formattedSize: formatBytes(file.size),
+        })
+      );
+      setselectedFiles(files);
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Only CSV format type supported.",
+      });
+    }
   }
   useEffect(() => {
     if (selectedFiles && selectedFiles.length > 0) {
@@ -66,7 +75,6 @@ const File = () => {
     const fileExtension = originalFilename.split(".").pop(); // Get the file extension
     return `${originalFilename}_${chunkIndex}.${fileExtension}`;
   };
-
   const uploadChunk = (chunk, chunkIndex, totalChunks, uniqueFilename) => {
     // const formData = new FormData();
     // formData.append("file", chunk);
@@ -128,16 +136,16 @@ const File = () => {
     //   .catch((error) => {
     //     // Handle errors
     //   });
-
     const formData = new FormData();
     formData.append("file", chunk);
     formData.append("chunkIndex", chunkIndex);
     formData.append("totalChunks", totalChunks);
     formData.append("uniqueFilename", uniqueFilename);
     formData.append("folderName", folder_name);
+    formData.append("fileSize", selectedFiles && selectedFiles[0]["size"]);
     // You can replace this with your server endpoint for handling file chunks
     axios
-      .post("https://demo.crmexperts.in/file_upload/index.php", formData, {
+      .post("https://demo.crmexperts.in/fileupload/index.php", formData, {
         onUploadProgress: (progressEvent) => {
           const progressPercentage = Math.round(
             (progressEvent.loaded * 100) / progressEvent.total
@@ -153,53 +161,179 @@ const File = () => {
         },
       })
       .then((response) => {
-        if (response) {
-        } else {
+        if (
+          response.lastupload==true
+        ) {
+          setLoading(false);
         }
+        // console.log(response);
+        // setUploading(true)
       })
-      .catch((error) => {});
+      .catch((error) => {
+        // console.log(error);
+      });
   };
-  const startUpload = () => {
-    setUploading(true);
+  // const startUpload = () => {
+  //   setUploading(true);
+  //   if (selectedFiles && selectedFiles.length > 0) {
+  //     const fileSize = selectedFiles[0].size;
+  //     const chunkSize = 50 * 1024 * 1024; // 50MB
+  //     const totalChunks = Math.ceil(fileSize / chunkSize);
+  //     setTotalChunks(totalChunks);
+  //     // setChunks(
+  //     //   Array.from({ length: totalChunks }, (_, index) => ({
+  //     //     filename: generateUniqueFilename(selectedFiles[0].name, index),
+  //     //     progress: 0,
+  //     //   }))
+  //     // );
+  //     setChunks(
+  //       Array.from({ length: totalChunks }, (_, index) => {
+  //         const chunk = selectedFiles[0].slice(
+  //           index * chunkSize,
+  //           Math.min((index + 1) * chunkSize, fileSize)
+  //         );
+  //         return {
+  //           filename: generateUniqueFilename(selectedFiles[0].name, index),
+  //           progress: 0,
+  //           size: chunk.size,
+  //         };
+  //       })
+  //     );
 
+  //     for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+  //       const start = chunkIndex * chunkSize;
+  //       const end = Math.min(start + chunkSize, fileSize);
+  //       const chunk = selectedFiles[0].slice(start, end);
+
+  //       const uniqueFilename = generateUniqueFilename(
+  //         selectedFiles[0].name,
+  //         chunkIndex
+  //       );
+  //       uploadChunk(chunk, chunkIndex, totalChunks, uniqueFilename);
+  //       // saveChunkLocally(chunk,chunkIndex,uniqueFilename)
+  //     }
+  //   }
+  // };
+  // const startUpload = () => {
+  //   setUploading(true);
+  //   if (selectedFiles && selectedFiles.length > 0) {
+  //     const fileSize = selectedFiles[0].size;
+  //     const chunkSize = 50 * 1024 * 1024; // 50MB
+  //     const totalChunks = Math.ceil(fileSize / chunkSize);
+  //     setTotalChunks(totalChunks);
+
+  //     // Read the selected file as a Blob
+  //     const reader = new FileReader();
+  //     reader.onload = (event) => {
+  //       const fileContent = event.target.result; // The content of the entire file
+  //       const textDecoder = new TextDecoder('utf-8');
+  //       const fileContentString = textDecoder.decode(fileContent);
+  //       const lines = fileContentString.split('\n');
+  //       const header = lines[0]; // Assuming the first line is the header
+
+  //       setChunks(
+  //         Array.from({ length: totalChunks }, (_, index) => {
+  //           const start = index * chunkSize;
+  //           const end = Math.min((index + 1) * chunkSize, fileSize);
+  //           const chunk = selectedFiles[0].slice(start, end);
+  //           const uniqueFilename = generateUniqueFilename(selectedFiles[0].name, index);
+
+  //           // Prepend the header to the chunk
+  //           const chunkWithHeader = new Blob([header, '\n', chunk], { type: selectedFiles[0].type });
+
+  //           return {
+  //             filename: uniqueFilename,
+  //             progress: 0,
+  //             size: chunkWithHeader.size,
+  //           };
+  //         })
+  //       );
+
+  //       for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+  //         const start = chunkIndex * chunkSize;
+  //         const end = Math.min(start + chunkSize, fileSize);
+  //         const chunk = selectedFiles[0].slice(start, end);
+
+  //         const uniqueFilename = generateUniqueFilename(selectedFiles[0].name, chunkIndex);
+
+  //         // Upload the chunk with the header
+  //         uploadChunk(chunk, chunkIndex, totalChunks, uniqueFilename);
+  //       }
+  //     };
+
+  //     reader.readAsArrayBuffer(selectedFiles[0]);
+  //   }
+  // };
+  const startUpload = () => {
+    setLoading(true);
+    setUploading(true);
     if (selectedFiles && selectedFiles.length > 0) {
       const fileSize = selectedFiles[0].size;
       const chunkSize = 50 * 1024 * 1024; // 50MB
       const totalChunks = Math.ceil(fileSize / chunkSize);
       setTotalChunks(totalChunks);
 
-      // setChunks(
-      //   Array.from({ length: totalChunks }, (_, index) => ({
-      //     filename: generateUniqueFilename(selectedFiles[0].name, index),
-      //     progress: 0,
-      //   }))
-      // );
-      setChunks(
-        Array.from({ length: totalChunks }, (_, index) => {
-          const chunk = selectedFiles[0].slice(
-            index * chunkSize,
-            Math.min((index + 1) * chunkSize, fileSize)
-          );
-          return {
-            filename: generateUniqueFilename(selectedFiles[0].name, index),
-            progress: 0,
-            size: chunk.size,
-          };
-        })
-      );
+      // Read the selected file as a Blob
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const fileContent = event.target.result; // The content of the entire file
+        const textDecoder = new TextDecoder("utf-8");
+        const fileContentString = textDecoder.decode(fileContent);
+        const lines = fileContentString.split("\n");
+        const header = lines[0]; // Assuming the first line is the header
+        const linesPerChunk = Math.ceil(lines.length / totalChunks);
 
-      for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-        const start = chunkIndex * chunkSize;
-        const end = Math.min(start + chunkSize, fileSize);
-        const chunk = selectedFiles[0].slice(start, end);
-
-        const uniqueFilename = generateUniqueFilename(
-          selectedFiles[0].name,
-          chunkIndex
+        setChunks(
+          Array.from({ length: totalChunks }, (_, index) => {
+            const start = index * chunkSize;
+            const end = Math.min((index + 1) * chunkSize, fileSize);
+            const chunk = selectedFiles[0].slice(start, end);
+            const uniqueFilename = generateUniqueFilename(
+              selectedFiles[0].name,
+              index
+            );
+            return {
+              filename: uniqueFilename,
+              progress: 0,
+              size: chunk.size,
+            };
+          })
         );
-        uploadChunk(chunk, chunkIndex, totalChunks, uniqueFilename);
-        // saveChunkLocally(chunk,chunkIndex,uniqueFilename)
-      }
+        for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+          const startLine = chunkIndex * linesPerChunk;
+          // const end = Math.min(start + chunkSize, fileSize);
+          const endLine = startLine + linesPerChunk;
+          // const chunk = selectedFiles[0].slice(start, end);
+          const chunkLines = lines.slice(startLine, endLine);
+          const chunkContent =
+            chunkIndex === 0
+              ? chunkLines.join("\n")
+              : [header, ...chunkLines].join("\n");
+          const chunkBlob = new Blob([chunkContent], {
+            type: selectedFiles[0].type,
+          });
+          const uniqueFilename = generateUniqueFilename(
+            selectedFiles[0].name,
+            chunkIndex
+          );
+
+          // let chunkToUpload;
+          // if (chunkIndex === 0) {
+          //   // Use the original chunk for the first chunk
+          //   chunkToUpload = chunk;
+          // } else {
+          //   // Prepend the header to the chunk
+          //   chunkToUpload = new Blob([header, "\n", chunk], {
+          //     type: selectedFiles[0].type,
+          //   });
+          // }
+
+          // Upload the chunk
+          uploadChunk(chunkBlob, chunkIndex, totalChunks, uniqueFilename);
+        }
+      };
+
+      reader.readAsArrayBuffer(selectedFiles[0]);
     }
   };
 
@@ -232,10 +366,10 @@ const File = () => {
                   <h4 className="card-title mb-0">Upload Documents</h4>
                 </CardHeader>
                 <CardBody>
-                  <p className="text-muted">
+                  {/* <p className="text-muted">
                     DropzoneJS is an open source library that provides
                     drag’n’drop file uploads with image previews.
-                  </p>
+                  </p> */}
                   <Dropzone
                     onDrop={(acceptedFiles) => {
                       handleAcceptedFiles(acceptedFiles);
@@ -291,13 +425,49 @@ const File = () => {
                     })}
                   </div>
                   <div className="d-flex justify-content-center">
-                    <Button
+                    {/* <Button
                       onClick={startUpload}
+                      disabled={!selectedFiles[0]}
                       color="success"
                       className=" btn-label right mt-4"
                     >
                       <i className=" ri-upload-line label-icon align-middle  fs-16 ms-2"></i>
                       Upload
+                    </Button> */}
+
+                    <Button
+                      color="success"
+                      className="btn-label right mt-4"
+                      onClick={() => {
+                        startUpload();
+                        setCheck(true);
+                        // setLoading(false);
+                      }}
+                      disabled={!selectedFiles[0] ? true : check && loading}
+                    >
+                      {check ? (
+                        <span className="d-flex align-items-center">
+                          <Spinner
+                            size="sm"
+                            className="flex-shrink-0"
+                            style={{
+                              display: !loading ? "none" : "block",
+                            }}
+                          >
+                            Uploading
+                          </Spinner>
+                          <span className="flex-grow-1 ms-2">
+                            {" "}
+                            <i className=" ri-upload-line label-icon align-middle  fs-16 ms-2"></i>
+                            Upload
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="flex-grow-1 ms-2">
+                          <i className="ri-upload-line label-icon align-middle fs-16 ms-2"></i>
+                          Upload
+                        </span>
+                      )}
                     </Button>
                   </div>
                 </CardBody>
@@ -332,7 +502,7 @@ const File = () => {
                                         {file.filename}
                                       </p>
                                     </h5>
-                                    <div className="d-flex align-items-center ">
+                                    <div className="d-flex align-items-center mb-2">
                                       <div className="progress-container">
                                         <progress
                                           max="100"
@@ -346,12 +516,12 @@ const File = () => {
                                     </div>
                                   </div>
                                   <div className="file-size">
-                                    {file.size < 10000
+                                    {/* {file.size < 10000
                                       ? "0.01"
                                       : (file.size / (1024 * 1024)).toFixed(
                                           2
                                         )}{" "}
-                                    MB
+                                    MB */}
                                   </div>
                                 </div>
                               </div>
