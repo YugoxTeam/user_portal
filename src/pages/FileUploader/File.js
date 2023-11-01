@@ -161,10 +161,12 @@ const File = () => {
         },
       })
       .then((response) => {
-        if (
-          response.lastupload==true
-        ) {
+        if (response.lastupload == true) {
           setLoading(false);
+          Swal.fire({
+            icon: "success",
+            title: "Successfully Uploaded",
+          });
         }
         // console.log(response);
         // setUploading(true)
@@ -437,7 +439,7 @@ const File = () => {
 
                     <Button
                       color="success"
-                      className="btn-label right mt-4"
+                      className="btn-label right mt-4 me-2"
                       onClick={() => {
                         startUpload();
                         setCheck(true);
@@ -468,6 +470,16 @@ const File = () => {
                           Upload
                         </span>
                       )}
+                    </Button>
+                    <Button className=" btn-label right mt-4 ">
+                      <i className=" ri-download-line label-icon align-middle  fs-16 ms-2"></i>
+                      <Link
+                        to="https://demo.crmexperts.in/fileupload/getSampleData.php"
+                        target="_blank"
+                        className="text-white"
+                      >
+                        Sample Download
+                      </Link>
                     </Button>
                   </div>
                 </CardBody>
