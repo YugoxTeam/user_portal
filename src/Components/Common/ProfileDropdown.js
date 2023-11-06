@@ -98,11 +98,12 @@ const ProfileDropdown = () => {
     }
   }, [idleTime]);
 
-  const [contactDetails, setContactDetails] = useState([]);
-  const [org, setOrg] = useState([]);
-  const { REACT_APP_API_URL } = process.env;
-  const [isLoading, setIsLoading] = useState(false);
-  const profile_img_change=localStorage.getItem("profile_img_change")
+  
+  // const [contactDetails, setContactDetails] = useState([]);
+  // const [org, setOrg] = useState([]);
+  // const { REACT_APP_API_URL } = process.env;
+  // const [isLoading, setIsLoading] = useState(false);
+  // const profile_img_change=localStorage.getItem("profile_img_change")
 
 
   // useEffect(() => {

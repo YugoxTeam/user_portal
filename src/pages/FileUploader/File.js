@@ -100,22 +100,22 @@ const File = () => {
     }
   }
   useEffect(() => {
-    const data = new URLSearchParams();
-    data.append("_operation", "describe");
+    const data = new FormData();
+    data.append("_operation", "GetSampleFile");
+    data.append("postdata", true);
     data.append("username", user_name);
     data.append("password", user_pass);
-    data.append("module", "Leads");
     data.append("_session", session);
 
     const headers = {
-      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Type": "multipart/form-data",
     };
 
     axios
       .post(REACT_APP_API_URL, data, { headers })
       .then((response) => {
         // console.log(response);
-        setGetCRMHeader(response.result.describe["fields"]);
+        setGetCRMHeader(response.result["fields"]);
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -154,9 +154,10 @@ const File = () => {
     formData.append("uniqueFilename", uniqueFilename);
     formData.append("folderName", folder_name);
     formData.append("fileSize", selectedFiles && selectedFiles[0]["size"]);
+    formData.append("uploadFile", true);
     // You can replace this with your server endpoint for handling file chunks
     axios
-      .post("https://demo.crmexperts.in/fileupload/index.php", formData, {
+      .post(REACT_APP_API_URL, formData, {
         onUploadProgress: (progressEvent) => {
           const progressPercentage = Math.round(
             (progressEvent.loaded * 100) / progressEvent.total
@@ -176,8 +177,10 @@ const File = () => {
         const formD = new FormData();
         formD.append("folderName", folder_name);
         formD.append("uniqueFilename", uniqueFilename);
+        formD.append("uploadCSV", true);
+        formD.append("_session", session);
         axios
-          .post("https://demo.crmexperts.in/fileupload/uploadcsv.php", formD)
+          .post(REACT_APP_API_URL, formD)
           .then((res) => {})
           .catch((err) => {
             console.log(err);
@@ -190,7 +193,7 @@ const File = () => {
           });
           setselectedFiles([]);
           setEnble(true);
-          setUploading(false)
+          setUploading(false);
         }
         // console.log(response);
         // setUploading(true)
@@ -261,15 +264,12 @@ const File = () => {
     }
   };
   //**import file data */
-  useEffect(() => {
-    const data = new URLSearchParams();
-    data.append("_operation", "GetUploadStatus");
-    data.append("username", user_name);
-    data.append("password", user_pass);
-    data.append("_session", session);
+  const fetch = () => {
+    const data = new FormData();
+    data.append("processData", true);
 
     const headers = {
-      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Type": "multipart/form-data",
     };
 
     axios
@@ -279,17 +279,22 @@ const File = () => {
           {
             id: 1,
             label: "Record successfully imported",
-            counter: response.result["insert_data"],
+            counter: response["import"],
             decimals: 0,
             suffix: "",
             prefix: "",
-            totalCounter: response.result["all_data"],
+            totalCounter: response["total"],
           },
         ]);
       })
       .catch((error) => {
         console.error("Error:", error);
       });
+  };
+  useEffect(() => {
+    fetch();
+    const interval = setInterval(fetch, 180000);
+    return () => clearInterval(interval);
   }, []);
 
   //**disable submit button on header change  */
@@ -383,7 +388,7 @@ const File = () => {
                         <Button className=" btn-label right mt-4 ">
                           <i className=" ri-download-line label-icon align-middle  fs-16 ms-2"></i>
                           <Link
-                            to="https://demo.crmexperts.in/fileupload/getSampleData.php"
+                            to={`${REACT_APP_API_URL}?sampleData=true&s=${session}`}
                             target="_blank"
                             className="text-white"
                           >
