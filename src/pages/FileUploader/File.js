@@ -8,14 +8,23 @@ import {
   Col,
   Container,
   Input,
+  Modal,
+  ModalBody,
+  ModalHeader,
   Row,
   Spinner,
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import Dropzone from "react-dropzone";
+import CountUp from "react-countup";
 import "./file.css";
 const File = () => {
+  const { REACT_APP_API_URL } = process.env;
+  const session = localStorage.getItem("session");
+  const value = JSON.parse(localStorage.getItem("Registered_User"));
+  const user_name = value.username;
+  const user_pass = value.password;
   const [selectedFiles, setselectedFiles] = useState([]);
   const [progress, setProgress] = useState(0);
   const [chunk, setChunk] = useState([]);
@@ -25,6 +34,27 @@ const File = () => {
   const [check, setCheck] = useState(false);
   const [loading, setLoading] = useState(true);
   const folder_name = Date.now();
+  const [modal_animationZoom, setmodal_animationZoom] = useState(false);
+  const [header, setHeader] = useState([]);
+  const [getCRMHeader, setGetCRMHeader] = useState([]);
+  const [selectedValues, setSelectedValues] = useState({});
+  const [newHeader, setNewHeader] = useState(null);
+  const [laod, setLaod] = useState(false);
+  const [importLead, setImportLead] = useState([
+    {
+      id: 1,
+      label: "Record successfully imported",
+      counter: "0",
+      decimals: 0,
+      suffix: "",
+      prefix: "",
+      totalCounter: "0",
+    },
+  ]);
+
+  function tog_animationZoom() {
+    setmodal_animationZoom(!modal_animationZoom);
+  }
   function formatBytes(bytes, decimals = 2) {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
@@ -43,6 +73,27 @@ const File = () => {
         })
       );
       setselectedFiles(files);
+      // Use a state variable to store the content of the CSV file
+      const fileReader = new FileReader();
+      fileReader.onload = (event) => {
+        const fileContent = event.target.result;
+        const textDecoder = new TextDecoder("utf-8");
+        const fileContentString = textDecoder.decode(fileContent);
+        const lines = fileContentString.split("\n");
+        const _header = lines[0]; // Assuming the first line is the header
+        const headerKeywords = _header.split(",");
+        const trimmedKeywords = headerKeywords.map((keyword) => keyword.trim());
+        setHeader(trimmedKeywords);
+        if (header) {
+          tog_animationZoom();
+          // console.log(header);
+        }
+      };
+
+      // Read the first file in the 'files' array
+      if (files.length > 0) {
+        fileReader.readAsArrayBuffer(files[0]);
+      }
     } else {
       Swal.fire({
         icon: "error",
@@ -51,6 +102,29 @@ const File = () => {
       });
     }
   }
+  useEffect(() => {
+    const data = new URLSearchParams();
+    data.append("_operation", "describe");
+    data.append("username", user_name);
+    data.append("password", user_pass);
+    data.append("module", "Leads");
+    data.append("_session", session);
+
+    const headers = {
+      "Content-Type": "application/x-www-form-urlencoded",
+    };
+
+    axios
+      .post(REACT_APP_API_URL, data, { headers })
+      .then((response) => {
+        // console.log(response);
+        setGetCRMHeader(response.result.describe["fields"]);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, [selectedFiles]);
+
   useEffect(() => {
     if (selectedFiles && selectedFiles.length > 0) {
       const fileSize = selectedFiles[0].size;
@@ -76,66 +150,6 @@ const File = () => {
     return `${originalFilename}_${chunkIndex}.${fileExtension}`;
   };
   const uploadChunk = (chunk, chunkIndex, totalChunks, uniqueFilename) => {
-    // const formData = new FormData();
-    // formData.append("file", chunk);
-    // formData.append("chunkIndex", chunkIndex);
-    // formData.append("totalChunks", totalChunks);
-    // formData.append("uniqueFilename", uniqueFilename);
-    // formData.append("folderName", folder_name);
-
-    // // Create the fetch options
-    // const fetchOptions = {
-    //   method: "POST",
-    //   body: formData,
-    //   // credentials: "include", // Equivalent to withCredentials: true
-    // };
-
-    // // Replace this with your server endpoint for handling file chunks
-    // fetch("https://demo.crmexperts.in/file_upload/index.php", fetchOptions)
-    //   .then((response) => {
-    //     if (!response.ok) {
-    //       throw new Error("Network response was not ok");
-    //     }
-    //     const contentLength = response.headers.get("content-length");
-    //     if (!contentLength) {
-    //       throw new Error("Content-Length header is missing in the response");
-    //     }
-
-    //     // Create a ReadableStream from the response body
-    //     const reader = response.body.getReader();
-    //     let loaded = 0;
-    //     const total = parseInt(contentLength, 10);
-
-    //     // Process the response data and calculate progress
-    //     function processResponse({ done, value }) {
-    //       if (done) {
-    //         // Finished processing
-    //         return;
-    //       }
-
-    //       loaded += value.length;
-    //       const progressPercentage = Math.round((loaded * 100) / total);
-
-    //       // Update progress using the progressPercentage
-    //       setProgress(progressPercentage);
-    //       setChunks((prevChunks) =>
-    //         prevChunks.map((chunk, index) =>
-    //           index === chunkIndex
-    //             ? { ...chunk, progress: progressPercentage }
-    //             : chunk
-    //         )
-    //       );
-
-    //       // Continue processing the response data
-    //       return reader.read().then(`processResponse`);
-    //     }
-
-    //     // Start processing the response data
-    //     reader.read().then(processResponse);
-    //   })
-    //   .catch((error) => {
-    //     // Handle errors
-    //   });
     const formData = new FormData();
     formData.append("file", chunk);
     formData.append("chunkIndex", chunkIndex);
@@ -161,6 +175,16 @@ const File = () => {
         },
       })
       .then((response) => {
+        //**api call for each chunk */
+        const formD = new FormData();
+        formD.append("folderName", folder_name);
+        formD.append("uniqueFilename", uniqueFilename);
+        axios
+          .post("https://demo.crmexperts.in/fileupload/uploadcsv.php", formD)
+          .then((res) => {})
+          .catch((err) => {
+            console.log(err);
+          });
         if (response.lastupload == true) {
           setLoading(false);
           Swal.fire({
@@ -175,103 +199,12 @@ const File = () => {
         // console.log(error);
       });
   };
-  // const startUpload = () => {
-  //   setUploading(true);
-  //   if (selectedFiles && selectedFiles.length > 0) {
-  //     const fileSize = selectedFiles[0].size;
-  //     const chunkSize = 50 * 1024 * 1024; // 50MB
-  //     const totalChunks = Math.ceil(fileSize / chunkSize);
-  //     setTotalChunks(totalChunks);
-  //     // setChunks(
-  //     //   Array.from({ length: totalChunks }, (_, index) => ({
-  //     //     filename: generateUniqueFilename(selectedFiles[0].name, index),
-  //     //     progress: 0,
-  //     //   }))
-  //     // );
-  //     setChunks(
-  //       Array.from({ length: totalChunks }, (_, index) => {
-  //         const chunk = selectedFiles[0].slice(
-  //           index * chunkSize,
-  //           Math.min((index + 1) * chunkSize, fileSize)
-  //         );
-  //         return {
-  //           filename: generateUniqueFilename(selectedFiles[0].name, index),
-  //           progress: 0,
-  //           size: chunk.size,
-  //         };
-  //       })
-  //     );
-
-  //     for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-  //       const start = chunkIndex * chunkSize;
-  //       const end = Math.min(start + chunkSize, fileSize);
-  //       const chunk = selectedFiles[0].slice(start, end);
-
-  //       const uniqueFilename = generateUniqueFilename(
-  //         selectedFiles[0].name,
-  //         chunkIndex
-  //       );
-  //       uploadChunk(chunk, chunkIndex, totalChunks, uniqueFilename);
-  //       // saveChunkLocally(chunk,chunkIndex,uniqueFilename)
-  //     }
-  //   }
-  // };
-  // const startUpload = () => {
-  //   setUploading(true);
-  //   if (selectedFiles && selectedFiles.length > 0) {
-  //     const fileSize = selectedFiles[0].size;
-  //     const chunkSize = 50 * 1024 * 1024; // 50MB
-  //     const totalChunks = Math.ceil(fileSize / chunkSize);
-  //     setTotalChunks(totalChunks);
-
-  //     // Read the selected file as a Blob
-  //     const reader = new FileReader();
-  //     reader.onload = (event) => {
-  //       const fileContent = event.target.result; // The content of the entire file
-  //       const textDecoder = new TextDecoder('utf-8');
-  //       const fileContentString = textDecoder.decode(fileContent);
-  //       const lines = fileContentString.split('\n');
-  //       const header = lines[0]; // Assuming the first line is the header
-
-  //       setChunks(
-  //         Array.from({ length: totalChunks }, (_, index) => {
-  //           const start = index * chunkSize;
-  //           const end = Math.min((index + 1) * chunkSize, fileSize);
-  //           const chunk = selectedFiles[0].slice(start, end);
-  //           const uniqueFilename = generateUniqueFilename(selectedFiles[0].name, index);
-
-  //           // Prepend the header to the chunk
-  //           const chunkWithHeader = new Blob([header, '\n', chunk], { type: selectedFiles[0].type });
-
-  //           return {
-  //             filename: uniqueFilename,
-  //             progress: 0,
-  //             size: chunkWithHeader.size,
-  //           };
-  //         })
-  //       );
-
-  //       for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-  //         const start = chunkIndex * chunkSize;
-  //         const end = Math.min(start + chunkSize, fileSize);
-  //         const chunk = selectedFiles[0].slice(start, end);
-
-  //         const uniqueFilename = generateUniqueFilename(selectedFiles[0].name, chunkIndex);
-
-  //         // Upload the chunk with the header
-  //         uploadChunk(chunk, chunkIndex, totalChunks, uniqueFilename);
-  //       }
-  //     };
-
-  //     reader.readAsArrayBuffer(selectedFiles[0]);
-  //   }
-  // };
   const startUpload = () => {
     setLoading(true);
     setUploading(true);
     if (selectedFiles && selectedFiles.length > 0) {
       const fileSize = selectedFiles[0].size;
-      const chunkSize = 50 * 1024 * 1024; // 50MB
+      const chunkSize = 10 * 1024 * 1024; // 10MB
       const totalChunks = Math.ceil(fileSize / chunkSize);
       setTotalChunks(totalChunks);
 
@@ -284,7 +217,6 @@ const File = () => {
         const lines = fileContentString.split("\n");
         const header = lines[0]; // Assuming the first line is the header
         const linesPerChunk = Math.ceil(lines.length / totalChunks);
-
         setChunks(
           Array.from({ length: totalChunks }, (_, index) => {
             const start = index * chunkSize;
@@ -310,7 +242,10 @@ const File = () => {
           const chunkContent =
             chunkIndex === 0
               ? chunkLines.join("\n")
-              : [header, ...chunkLines].join("\n");
+              : [
+                  newHeader ? Object.values(newHeader) : header,
+                  ...chunkLines,
+                ].join("\n");
           const chunkBlob = new Blob([chunkContent], {
             type: selectedFiles[0].type,
           });
@@ -318,19 +253,6 @@ const File = () => {
             selectedFiles[0].name,
             chunkIndex
           );
-
-          // let chunkToUpload;
-          // if (chunkIndex === 0) {
-          //   // Use the original chunk for the first chunk
-          //   chunkToUpload = chunk;
-          // } else {
-          //   // Prepend the header to the chunk
-          //   chunkToUpload = new Blob([header, "\n", chunk], {
-          //     type: selectedFiles[0].type,
-          //   });
-          // }
-
-          // Upload the chunk
           uploadChunk(chunkBlob, chunkIndex, totalChunks, uniqueFilename);
         }
       };
@@ -338,25 +260,78 @@ const File = () => {
       reader.readAsArrayBuffer(selectedFiles[0]);
     }
   };
+  const handleSelectChange = (item, value) => {
+    setSelectedValues((prevSelectedValues) => ({
+      ...prevSelectedValues,
+      [item]: value,
+    }));
+  };
 
-  const saveChunkLocally = (chunk, chunkIndex, customFileName) => {
-    const fileReader = new FileReader();
-    fileReader.onload = function (event) {
-      const chunkData = event.target.result;
-      const blob = new Blob([chunkData]);
-      const chunkFileName = `${customFileName}.dat`;
+  const handleSubmit = () => {
+    setLaod(true);
+    // Create an object to store the values to submit
+    const valuesToSubmit = {};
 
-      const downloadLink = document.createElement("a");
-      downloadLink.href = URL.createObjectURL(blob);
-      downloadLink.download = chunkFileName;
-      downloadLink.style.display = "none";
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
+    header.forEach((item) => {
+      const correspondingCRMItem = getCRMHeader.find(
+        (crmItem) => crmItem.label === item
+      );
+      const selectedValue = selectedValues[item] || ""; // Use the selected value or an empty string
+
+      // If the selected value is empty, send the default value; otherwise, send the selected value
+      valuesToSubmit[item] =
+        selectedValue ||
+        (correspondingCRMItem ? correspondingCRMItem.label : "");
+    });
+
+    // Log or submit the values
+    setNewHeader(valuesToSubmit);
+    // if (newHeader && Object.values(newHeader).includes(value)) {
+    //   alert("sdlkjf");
+    // }
+    // You can also submit the values to your API or perform other actions here
+  };
+  useEffect(() => {
+    if (laod && newHeader) {
+      Swal.fire({
+        icon: "success",
+        title: "Ready to upload",
+      });
+      tog_animationZoom();
+    }
+  }, [laod]);
+  //**import file data */
+  useEffect(() => {
+    const data = new URLSearchParams();
+    data.append("_operation", "GetUploadStatus");
+    data.append("username", user_name);
+    data.append("password", user_pass);
+    data.append("_session", session);
+
+    const headers = {
+      "Content-Type": "application/x-www-form-urlencoded",
     };
 
-    fileReader.readAsArrayBuffer(chunk);
-  };
+    axios
+      .post(REACT_APP_API_URL, data, { headers })
+      .then((response) => {
+        setImportLead([
+          {
+            id: 1,
+            label: "Record successfully imported",
+            counter: response.result["insert_data"],
+            decimals: 0,
+            suffix: "",
+            prefix: "",
+            totalCounter: response.result["all_data"],
+          },
+        ]);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, []);
+
   return (
     <React.Fragment>
       <div className="page-content">
@@ -368,10 +343,6 @@ const File = () => {
                   <h4 className="card-title mb-0">Upload Documents</h4>
                 </CardHeader>
                 <CardBody>
-                  {/* <p className="text-muted">
-                    DropzoneJS is an open source library that provides
-                    drag’n’drop file uploads with image previews.
-                  </p> */}
                   <Dropzone
                     onDrop={(acceptedFiles) => {
                       handleAcceptedFiles(acceptedFiles);
@@ -427,16 +398,6 @@ const File = () => {
                     })}
                   </div>
                   <div className="d-flex justify-content-center">
-                    {/* <Button
-                      onClick={startUpload}
-                      disabled={!selectedFiles[0]}
-                      color="success"
-                      className=" btn-label right mt-4"
-                    >
-                      <i className=" ri-upload-line label-icon align-middle  fs-16 ms-2"></i>
-                      Upload
-                    </Button> */}
-
                     <Button
                       color="success"
                       className="btn-label right mt-4 me-2"
@@ -459,7 +420,6 @@ const File = () => {
                             Uploading
                           </Spinner>
                           <span className="flex-grow-1 ms-2">
-                            {" "}
                             <i className=" ri-upload-line label-icon align-middle  fs-16 ms-2"></i>
                             Upload
                           </span>
@@ -481,6 +441,32 @@ const File = () => {
                         Sample Download
                       </Link>
                     </Button>
+                  </div>
+                  <div className="d-flex justify-content-end">
+                    {(importLead || []).map((item, key) => (
+                      <div key={key} className="">
+                        <h3 className="text-muted text-uppercase fs-13">
+                          {item.label}
+                        </h3>
+                        <h4 className="">
+                          <span className="counter-value">
+                            <CountUp
+                              start={0}
+                              prefix={item.prefix}
+                              suffix={item.suffix}
+                              separator={item.separator}
+                              end={item.counter}
+                              decimals={item.decimals}
+                              duration={4}
+                            />
+                          </span>
+                          /
+                          <span className="counter-value">
+                            {item.totalCounter}
+                          </span>
+                        </h4>
+                      </div>
+                    ))}
                   </div>
                 </CardBody>
               </Card>
@@ -514,27 +500,20 @@ const File = () => {
                                         {file.filename}
                                       </p>
                                     </h5>
-                                    <div className="d-flex align-items-center mb-2">
-                                      <div className="progress-container">
+                                    <div className="d-flex align-items-center mb-3">
+                                      <div className="progress-containers">
                                         <progress
                                           max="100"
                                           value={file.progress}
-                                          className="progress-bar"
+                                          className="progress-bars"
                                         />
-                                        <p className="progress-label">
+                                        <p className="progress-labels">
                                           {file.progress}%
                                         </p>
                                       </div>
                                     </div>
                                   </div>
-                                  <div className="file-size">
-                                    {/* {file.size < 10000
-                                      ? "0.01"
-                                      : (file.size / (1024 * 1024)).toFixed(
-                                          2
-                                        )}{" "}
-                                    MB */}
-                                  </div>
+                                  <div className="file-size"></div>
                                 </div>
                               </div>
                             </Col>
@@ -546,6 +525,99 @@ const File = () => {
               </Card>
             </Col>
           </Row>
+          <Modal
+            id="flipModal"
+            isOpen={modal_animationZoom}
+            toggle={() => {
+              tog_animationZoom();
+            }}
+            modalClassName="zoomIn"
+            centered
+            // backdrop={false}
+          >
+            <ModalHeader
+              className="modal-title"
+              id="flipModalLabel"
+              toggle={() => {
+                tog_animationZoom();
+              }}
+            >
+              Fields Mapping
+            </ModalHeader>
+            <form>
+              <ModalBody>
+                <Row>
+                  <Col lg={6}>
+                    <p>CSV Header</p>
+                    {header?.map((item, index) => {
+                      return (
+                        <Input
+                          key={index}
+                          value={item}
+                          name={item}
+                          readOnly
+                          className="mb-3"
+                        />
+                      );
+                    })}
+                  </Col>
+                  <Col lg={6}>
+                    <p>CRM Fields</p>
+                    {header &&
+                      getCRMHeader &&
+                      header.map((item, index) => {
+                        const correspondingCRMItem = getCRMHeader.find(
+                          (crmItem) => crmItem.label === item
+                        );
+
+                        return (
+                          <Input
+                            type="select"
+                            id="type"
+                            name={item}
+                            className="form-control mb-3"
+                            placeholder="Select value"
+                            key={index}
+                            onChange={(e) => {
+                              handleSelectChange(item, e.target.value);
+                            }}
+                            // value={ correspondingCRMItem?correspondingCRMItem.name:''}
+                          >
+                            <option value="">Select an Option</option>
+                            {getCRMHeader.length > 0 &&
+                              getCRMHeader.map((crmItem, i) => (
+                                <option
+                                  value={crmItem.label}
+                                  key={i}
+                                  selected={
+                                    correspondingCRMItem &&
+                                    crmItem.label === correspondingCRMItem.label
+                                  }
+                                >
+                                  {crmItem.label}
+                                </option>
+                              ))}
+                          </Input>
+                        );
+                      })}
+                  </Col>
+                </Row>
+              </ModalBody>
+              <div className="modal-footer">
+                <Button
+                  color="light"
+                  onClick={() => {
+                    tog_animationZoom();
+                  }}
+                >
+                  Close
+                </Button>
+                <Button onClick={handleSubmit} color="primary">
+                  Save changes
+                </Button>
+              </div>
+            </form>
+          </Modal>
         </Container>
       </div>
     </React.Fragment>

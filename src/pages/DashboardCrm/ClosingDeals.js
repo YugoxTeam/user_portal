@@ -35,7 +35,8 @@ const ClosingDeals = () => {
                                     {(closingDeals || []).map((item, key) => (
                                         <tr key={key}>
                                             <td>{item.dealName}</td>
-                                            <td><img src={item.img} alt="" className="avatar-xs rounded-circle me-2" />
+                                            <td>
+                                            {/* <img src={item.img} alt="" className="avatar-xs rounded-circle me-2" /> */}
                                                 <Link to="#" className="text-body fw-medium">{item.salesRep}</Link></td>
                                             <td>${item.amount}k</td>
                                             <td>{item.closeDate}</td>
