@@ -14,11 +14,12 @@ import {
   Row,
   Spinner,
 } from "reactstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Dropzone from "react-dropzone";
 import CountUp from "react-countup";
 import "./file.css";
+import FieldMapping from "./FieldMapping";
 const File = () => {
   const { REACT_APP_API_URL } = process.env;
   const session = localStorage.getItem("session");
@@ -34,12 +35,15 @@ const File = () => {
   const [check, setCheck] = useState(false);
   const [loading, setLoading] = useState(true);
   const folder_name = Date.now();
-  const [modal_animationZoom, setmodal_animationZoom] = useState(false);
   const [header, setHeader] = useState([]);
   const [getCRMHeader, setGetCRMHeader] = useState([]);
-  const [selectedValues, setSelectedValues] = useState({});
-  const [newHeader, setNewHeader] = useState(null);
-  const [laod, setLaod] = useState(false);
+  const [newCSVHeader, setNewCSVHeader] = useState(null);
+  const [enble, setEnble] = useState(true);
+  const newHeader = (val) => {
+    if (val) {
+      setNewCSVHeader(Object.values(val));
+    }
+  };
   const [importLead, setImportLead] = useState([
     {
       id: 1,
@@ -52,9 +56,6 @@ const File = () => {
     },
   ]);
 
-  function tog_animationZoom() {
-    setmodal_animationZoom(!modal_animationZoom);
-  }
   function formatBytes(bytes, decimals = 2) {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
@@ -84,10 +85,6 @@ const File = () => {
         const headerKeywords = _header.split(",");
         const trimmedKeywords = headerKeywords.map((keyword) => keyword.trim());
         setHeader(trimmedKeywords);
-        if (header) {
-          tog_animationZoom();
-          // console.log(header);
-        }
       };
 
       // Read the first file in the 'files' array
@@ -191,6 +188,9 @@ const File = () => {
             icon: "success",
             title: "Successfully Uploaded",
           });
+          setselectedFiles([]);
+          setEnble(true);
+          setUploading(false)
         }
         // console.log(response);
         // setUploading(true)
@@ -243,7 +243,7 @@ const File = () => {
             chunkIndex === 0
               ? chunkLines.join("\n")
               : [
-                  newHeader ? Object.values(newHeader) : header,
+                  newCSVHeader ? Object.values(newCSVHeader) : header,
                   ...chunkLines,
                 ].join("\n");
           const chunkBlob = new Blob([chunkContent], {
@@ -260,46 +260,6 @@ const File = () => {
       reader.readAsArrayBuffer(selectedFiles[0]);
     }
   };
-  const handleSelectChange = (item, value) => {
-    setSelectedValues((prevSelectedValues) => ({
-      ...prevSelectedValues,
-      [item]: value,
-    }));
-  };
-
-  const handleSubmit = () => {
-    setLaod(true);
-    // Create an object to store the values to submit
-    const valuesToSubmit = {};
-
-    header.forEach((item) => {
-      const correspondingCRMItem = getCRMHeader.find(
-        (crmItem) => crmItem.label === item
-      );
-      const selectedValue = selectedValues[item] || ""; // Use the selected value or an empty string
-
-      // If the selected value is empty, send the default value; otherwise, send the selected value
-      valuesToSubmit[item] =
-        selectedValue ||
-        (correspondingCRMItem ? correspondingCRMItem.label : "");
-    });
-
-    // Log or submit the values
-    setNewHeader(valuesToSubmit);
-    // if (newHeader && Object.values(newHeader).includes(value)) {
-    //   alert("sdlkjf");
-    // }
-    // You can also submit the values to your API or perform other actions here
-  };
-  useEffect(() => {
-    if (laod && newHeader) {
-      Swal.fire({
-        icon: "success",
-        title: "Ready to upload",
-      });
-      tog_animationZoom();
-    }
-  }, [laod]);
   //**import file data */
   useEffect(() => {
     const data = new URLSearchParams();
@@ -332,6 +292,15 @@ const File = () => {
       });
   }, []);
 
+  //**disable submit button on header change  */
+  const enable = (val) => {
+    setEnble(val);
+  };
+  //**handle cancel button */
+  const handleCancle = () => {
+    setselectedFiles([]);
+    setEnble(true);
+  };
   return (
     <React.Fragment>
       <div className="page-content">
@@ -340,149 +309,181 @@ const File = () => {
             <Col lg={12}>
               <Card>
                 <CardHeader className="card-header">
-                  <h4 className="card-title mb-0">Upload Documents</h4>
+                  <h4 className="card-title mb-0">
+                    {selectedFiles && selectedFiles.length > 0
+                      ? "Field Mapping"
+                      : "Upload Documents"}
+                  </h4>
                 </CardHeader>
                 <CardBody>
-                  <Dropzone
-                    onDrop={(acceptedFiles) => {
-                      handleAcceptedFiles(acceptedFiles);
-                    }}
-                  >
-                    {({ getRootProps, getInputProps }) => (
-                      <div className="dropzone dz-clickable">
-                        <div
-                          className="dz-message needsclick"
-                          {...getRootProps()}
-                        >
-                          <div className="mb-3">
-                            <i className="display-4 text-muted ri-upload-cloud-2-fill" />
+                  {selectedFiles && selectedFiles.length > 0 ? (
+                    <FieldMapping
+                      header={header}
+                      getCRMHeader={getCRMHeader}
+                      newHeader={newHeader}
+                      enable={enable}
+                    />
+                  ) : (
+                    <>
+                      <Dropzone
+                        onDrop={(acceptedFiles) => {
+                          handleAcceptedFiles(acceptedFiles);
+                        }}
+                      >
+                        {({ getRootProps, getInputProps }) => (
+                          <div className="dropzone dz-clickable">
+                            <div
+                              className="dz-message needsclick"
+                              {...getRootProps()}
+                            >
+                              <div className="mb-3">
+                                <i className="display-4 text-muted ri-upload-cloud-2-fill" />
+                              </div>
+                              <h4>Drop files here or click to upload.</h4>
+                            </div>
                           </div>
-                          <h4>Drop files here or click to upload.</h4>
+                        )}
+                      </Dropzone>
+                      <div className="list-unstyled mb-0" id="file-previews">
+                        {selectedFiles.map((f, i) => {
+                          return (
+                            <Card
+                              className="mt-1 mb-0 shadow-none border dz-processing dz-image-preview dz-success dz-complete"
+                              key={i + "-file"}
+                            >
+                              <div className="p-2">
+                                <Row className="align-items-center">
+                                  <Col className="col-auto">
+                                    <img
+                                      data-dz-thumbnail=""
+                                      height="80"
+                                      className="avatar-sm rounded bg-light"
+                                      alt={f.name}
+                                      src={f.preview}
+                                    />
+                                  </Col>
+                                  <Col>
+                                    <Link
+                                      to="#"
+                                      className="text-muted font-weight-bold"
+                                    >
+                                      {f.name}
+                                    </Link>
+                                    <p className="mb-0">
+                                      <strong>{f.formattedSize}</strong>
+                                    </p>
+                                  </Col>
+                                </Row>
+                              </div>
+                            </Card>
+                          );
+                        })}
+                      </div>
+                      <div className="d-flex justify-content-between">
+                        <Button className=" btn-label right mt-4 ">
+                          <i className=" ri-download-line label-icon align-middle  fs-16 ms-2"></i>
+                          <Link
+                            to="https://demo.crmexperts.in/fileupload/getSampleData.php"
+                            target="_blank"
+                            className="text-white"
+                          >
+                            Sample Download
+                          </Link>
+                        </Button>
+                        <div className=" mt-3">
+                          {(importLead || []).map((item, key) => (
+                            <div key={key} className="">
+                              <h3 className="text-muted text-uppercase fs-13">
+                                {item.label}
+                              </h3>
+                              <h4 className="">
+                                <span className="counter-value">
+                                  <CountUp
+                                    start={0}
+                                    prefix={item.prefix}
+                                    suffix={item.suffix}
+                                    separator={item.separator}
+                                    end={item.counter}
+                                    decimals={item.decimals}
+                                    duration={4}
+                                  />
+                                </span>
+                                /
+                                <span className="counter-value">
+                                  {item.totalCounter}
+                                </span>
+                              </h4>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    )}
-                  </Dropzone>
-                  <div className="list-unstyled mb-0" id="file-previews">
-                    {selectedFiles.map((f, i) => {
-                      return (
-                        <Card
-                          className="mt-1 mb-0 shadow-none border dz-processing dz-image-preview dz-success dz-complete"
-                          key={i + "-file"}
-                        >
-                          <div className="p-2">
-                            <Row className="align-items-center">
-                              <Col className="col-auto">
-                                <img
-                                  data-dz-thumbnail=""
-                                  height="80"
-                                  className="avatar-sm rounded bg-light"
-                                  alt={f.name}
-                                  src={f.preview}
-                                />
-                              </Col>
-                              <Col>
-                                <Link
-                                  to="#"
-                                  className="text-muted font-weight-bold"
-                                >
-                                  {f.name}
-                                </Link>
-                                <p className="mb-0">
-                                  <strong>{f.formattedSize}</strong>
-                                </p>
-                              </Col>
-                            </Row>
-                          </div>
-                        </Card>
-                      );
-                    })}
-                  </div>
+                    </>
+                  )}
                   <div className="d-flex justify-content-center">
-                    <Button
-                      color="success"
-                      className="btn-label right mt-4 me-2"
-                      onClick={() => {
-                        startUpload();
-                        setCheck(true);
-                        // setLoading(false);
-                      }}
-                      disabled={!selectedFiles[0] ? true : check && loading}
-                    >
-                      {check ? (
-                        <span className="d-flex align-items-center">
-                          <Spinner
-                            size="sm"
-                            className="flex-shrink-0"
-                            style={{
-                              display: !loading ? "none" : "block",
-                            }}
-                          >
-                            Uploading
-                          </Spinner>
-                          <span className="flex-grow-1 ms-2">
-                            <i className=" ri-upload-line label-icon align-middle  fs-16 ms-2"></i>
-                            Upload
-                          </span>
-                        </span>
-                      ) : (
-                        <span className="flex-grow-1 ms-2">
-                          <i className="ri-upload-line label-icon align-middle fs-16 ms-2"></i>
-                          Upload
-                        </span>
-                      )}
-                    </Button>
-                    <Button className=" btn-label right mt-4 ">
-                      <i className=" ri-download-line label-icon align-middle  fs-16 ms-2"></i>
-                      <Link
-                        to="https://demo.crmexperts.in/fileupload/getSampleData.php"
-                        target="_blank"
-                        className="text-white"
-                      >
-                        Sample Download
-                      </Link>
-                    </Button>
-                  </div>
-                  <div className="d-flex justify-content-end">
-                    {(importLead || []).map((item, key) => (
-                      <div key={key} className="">
-                        <h3 className="text-muted text-uppercase fs-13">
-                          {item.label}
-                        </h3>
-                        <h4 className="">
-                          <span className="counter-value">
-                            <CountUp
-                              start={0}
-                              prefix={item.prefix}
-                              suffix={item.suffix}
-                              separator={item.separator}
-                              end={item.counter}
-                              decimals={item.decimals}
-                              duration={4}
-                            />
-                          </span>
-                          /
-                          <span className="counter-value">
-                            {item.totalCounter}
-                          </span>
-                        </h4>
-                      </div>
-                    ))}
+                    {newCSVHeader && !enble && (
+                      <>
+                        <Button
+                          className="btn mt-4 me-2"
+                          color="danger"
+                          id="cancel"
+                          onClick={() => {
+                            handleCancle();
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          color="success"
+                          id="upload"
+                          className="btn-label right mt-4 me-2"
+                          onClick={() => {
+                            startUpload();
+                            setCheck(true);
+                            // setLoading(false);
+                          }}
+                          disabled={!selectedFiles[0] ? true : check && loading}
+                        >
+                          {check ? (
+                            <span className="d-flex align-items-center">
+                              <Spinner
+                                size="sm"
+                                className="flex-shrink-0"
+                                style={{
+                                  display: !loading ? "none" : "block",
+                                }}
+                              >
+                                Import
+                              </Spinner>
+                              <span className="flex-grow-1 ms-2">
+                                <i className=" ri-upload-line label-icon align-middle  fs-16 ms-2"></i>
+                                Click to Import
+                              </span>
+                            </span>
+                          ) : (
+                            <span className="flex-grow-1 ms-2">
+                              <i className="ri-upload-line label-icon align-middle fs-16 ms-2"></i>
+                              Click to Import
+                            </span>
+                          )}
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </CardBody>
               </Card>
             </Col>
             <Col lg={12}>
               <Card>
-                <CardBody>
-                  <div className="vstack gap-2">
-                    <div className="border rounded border-dashed p-2">
-                      {uploading &&
-                        chunks &&
-                        chunks.map((file, index) => (
+                {uploading &&
+                  chunks &&
+                  chunks.map((file, index) => (
+                    <CardBody className="py-0 mt-2 mb-1">
+                      <div className="vstack gap-2">
+                        <div className="border rounded border-dashed p-2">
                           <Row>
                             <Col lg={12}>
                               <div
-                                className="d-flex align-items-center mb-3"
+                                className="d-flex align-items-center"
                                 id={index}
                                 key={index}
                               >
@@ -518,106 +519,13 @@ const File = () => {
                               </div>
                             </Col>
                           </Row>
-                        ))}
-                    </div>
-                  </div>
-                </CardBody>
+                        </div>
+                      </div>
+                    </CardBody>
+                  ))}
               </Card>
             </Col>
           </Row>
-          <Modal
-            id="flipModal"
-            isOpen={modal_animationZoom}
-            toggle={() => {
-              tog_animationZoom();
-            }}
-            modalClassName="zoomIn"
-            centered
-            // backdrop={false}
-          >
-            <ModalHeader
-              className="modal-title"
-              id="flipModalLabel"
-              toggle={() => {
-                tog_animationZoom();
-              }}
-            >
-              Fields Mapping
-            </ModalHeader>
-            <form>
-              <ModalBody>
-                <Row>
-                  <Col lg={6}>
-                    <p>CSV Header</p>
-                    {header?.map((item, index) => {
-                      return (
-                        <Input
-                          key={index}
-                          value={item}
-                          name={item}
-                          readOnly
-                          className="mb-3"
-                        />
-                      );
-                    })}
-                  </Col>
-                  <Col lg={6}>
-                    <p>CRM Fields</p>
-                    {header &&
-                      getCRMHeader &&
-                      header.map((item, index) => {
-                        const correspondingCRMItem = getCRMHeader.find(
-                          (crmItem) => crmItem.label === item
-                        );
-
-                        return (
-                          <Input
-                            type="select"
-                            id="type"
-                            name={item}
-                            className="form-control mb-3"
-                            placeholder="Select value"
-                            key={index}
-                            onChange={(e) => {
-                              handleSelectChange(item, e.target.value);
-                            }}
-                            // value={ correspondingCRMItem?correspondingCRMItem.name:''}
-                          >
-                            <option value="">Select an Option</option>
-                            {getCRMHeader.length > 0 &&
-                              getCRMHeader.map((crmItem, i) => (
-                                <option
-                                  value={crmItem.label}
-                                  key={i}
-                                  selected={
-                                    correspondingCRMItem &&
-                                    crmItem.label === correspondingCRMItem.label
-                                  }
-                                >
-                                  {crmItem.label}
-                                </option>
-                              ))}
-                          </Input>
-                        );
-                      })}
-                  </Col>
-                </Row>
-              </ModalBody>
-              <div className="modal-footer">
-                <Button
-                  color="light"
-                  onClick={() => {
-                    tog_animationZoom();
-                  }}
-                >
-                  Close
-                </Button>
-                <Button onClick={handleSubmit} color="primary">
-                  Save changes
-                </Button>
-              </div>
-            </form>
-          </Modal>
         </Container>
       </div>
     </React.Fragment>

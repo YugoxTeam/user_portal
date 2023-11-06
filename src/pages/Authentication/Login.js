@@ -82,6 +82,7 @@ const Login = (props) => {
         formdata.append("password", values.password);
         formdata.append("captcha_value", captchaValue);
         formdata.append("ip_address", ip);
+        formdata.append("postdata", true);
 
         axios({
           method: "post",
