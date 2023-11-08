@@ -3,7 +3,7 @@
   "version": "2.4.0",
   "private": true,
   "homepage": "/fileupload",
-   "dependencies": {
+  "dependencies": {
     "@cyntler/react-doc-viewer": "^1.14.0",
     "@reduxjs/toolkit": "^1.9.1",
     "@testing-library/jest-dom": "^5.16.5",
@@ -44,6 +44,7 @@
     "react-scripts": "5.0.1",
     "react-select": "^5.7.0",
     "react-table": "^7.8.0",
+    "react-tilt": "^1.0.2",
     "react-toastify": "^9.1.1",
     "reactstrap": "^9.1.5",
     "redux": "^4.2.0",

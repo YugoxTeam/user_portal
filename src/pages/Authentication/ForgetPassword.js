@@ -80,7 +80,7 @@ const ForgetPasswordPage = (props) => {
               // position: "top-end",
               icon: "success",
               title:
-                "Thank you for submitting your password reset request. If you have an existing account with us, a new passwordill be sent to the email address you provided. Please make sure to check your spam folder if yodo not see the email in your inbox. If you need further assistance, feel free to reach out to our Ridge Security sales team.",
+                "Thank you for submitting your password reset request. If you have an existing account with us, a new passwordill be sent to the email address you provided. Please make sure to check your spam folder if yodo not see the email in your inbox. If you need further assistance, feel free to reach out to our sales team.",
               showConfirmButton: true,
               timer: 5000,
             });
@@ -98,7 +98,7 @@ const ForgetPasswordPage = (props) => {
               showConfirmButton: true,
               timer: 5000,
               title:
-                "Thank you for submitting your password reset request. If you have an existing account with us, a new passwordill be sent to the email address you provided. Please make sure to check your spam folder if yodo not see the email in your inbox. If you need further assistance, feel free to reach out to our Ridge Security sales team.",
+                "Thank you for submitting your password reset request. If you have an existing account with us, a new passwordill be sent to the email address you provided. Please make sure to check your spam folder if yodo not see the email in your inbox. If you need further assistance, feel free to reach out to our sales team.",
             });
             // success.style.display = "none";
             // notSuccess.style.display = "block";

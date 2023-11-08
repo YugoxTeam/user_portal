@@ -111,7 +111,7 @@ const RequestAccess = () => {
                 // position: "top-end",
                 icon: "success",
                 title:
-                  "Thank you for your interest in accessing the Ridge Security partner/customer portal. We have received your access request and will now proceed to verify your account information. Please note that portal access is granted to partners who have signed a Non-Disclosure Agreement (NDA) or agreement with Ridge Security, as well as existing Ridge Security customers. If you do not receive the account activation email within 48 hours, kindly reach out to your Ridge Security sales team for further assistance. They will be able to provide you with the necessary support to ensure your access to the portal.",
+                  "Thank you for your interest in accessing the partner/customer portal. We have received your access request and will now proceed to verify your account information. Please note that portal access is granted to partners who have signed a Non-Disclosure Agreement (NDA) or agreement with , as well as existing customers. If you do not receive the account activation email within 48 hours, kindly reach out to your sales team for further assistance. They will be able to provide you with the necessary support to ensure your access to the portal.",
                 showConfirmButton: true,
                 // timer: 2000,
               });

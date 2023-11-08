@@ -23,11 +23,11 @@ const Footer = () => {
       <footer className="footer">
         <Container fluid>
           <Row>
-            <Col sm={6}>
-              © {new Date().getFullYear()} Ridge Security Technology Inc.
-            </Col>
-            <Col sm={6}>
-              <div className="text-sm-end d-none d-sm-block">
+            {/* <Col sm={6}>
+              © {new Date().getFullYear()}
+            </Col> */}
+            <Col sm={12}>
+              <div className="text-sm-end d-none d-sm-block d-flex flex-end">
                 <Link to="https://yugox.com/" target="_blank">
                   Design & Develop by Yugox Pvt. Ltd.
                 </Link>
