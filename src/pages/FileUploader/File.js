@@ -248,7 +248,7 @@ const File = () => {
     setUploading(true);
     if (selectedFiles && selectedFiles.length > 0) {
       const fileSize = selectedFiles[0].size;
-      const chunkSize = 10 * 1024 * 1024; // 10MB
+      const chunkSize = 3 * 1024 * 1024; // 10MB
       const totalChunks = Math.ceil(fileSize / chunkSize);
       setTotalChunks(totalChunks);
 

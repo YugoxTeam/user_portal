@@ -55,7 +55,7 @@
     "yup": "^0.32.11"
   },
   "scripts": {
-    "start": "set HTTPS=true&&react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build --href=./fileupload/",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
