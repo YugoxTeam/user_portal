@@ -20,7 +20,7 @@ const Navdata = () => {
   const [softwareDownload, setSoftwareDownload] = useState(false);
   const [partnership, setPartnership] = useState(false);
   const [faq, setFaq] = useState(false);
-  const [certificate, setCertificate] = useState(false)
+  const [certificate, setCertificate] = useState(false);
 
   const [isApps, setIsApps] = useState(false);
   const [isAuth, setIsAuth] = useState(false);
@@ -33,7 +33,8 @@ const Navdata = () => {
   const [isIcons, setIsIcons] = useState(false);
   const [isMaps, setIsMaps] = useState(false);
   const [isMultiLevel, setIsMultiLevel] = useState(false);
-  const [upload, setUpload] = useState(false)
+  const [upload, setUpload] = useState(false);
+  const [uploadHistory, setUploadHistory] = useState(false);
 
   const [iscurrentState, setIscurrentState] = useState("Dashboard");
 
@@ -142,6 +143,9 @@ const Navdata = () => {
     if (iscurrentState !== "FileUpload") {
       setUpload(false);
     }
+    if (iscurrentState !== "UploadHistory") {
+      setUploadHistory(false);
+    }
   }, [
     history,
     iscurrentState,
@@ -172,7 +176,8 @@ const Navdata = () => {
     isIcons,
     isMaps,
     isMultiLevel,
-    upload
+    upload,
+    uploadHistory,
   ]);
   // const asetRole = JSON.parse(decryptData("role"));
   const asetRole = localStorage.getItem("role");
@@ -211,7 +216,16 @@ const Navdata = () => {
         setIscurrentState("FileUpload");
       },
     },
-
+    {
+      id: "uploadHistory",
+      label: "Upload History",
+      icon: "ri-history-line",
+      link: "/upload-history",
+      click: function (e) {
+        e.preventDefault();
+        setIscurrentState("UploadHistory");
+      },
+    },
   ];
 
   //**end user menu */
