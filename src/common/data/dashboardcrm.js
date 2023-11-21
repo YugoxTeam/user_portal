@@ -3,9 +3,9 @@
 const crmWidgets = [
     {
         id: 1,
-        label: "Campaign Sent",
+        label: "Total Files",
         badge: "ri-arrow-up-circle-line text-success",
-        icon: "ri-space-ship-line",
+        icon: "ri-file-excel-2-line",
         counter: "197",
         decimals: 0,
         suffix: "",

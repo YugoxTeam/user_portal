@@ -171,7 +171,6 @@ const File = () => {
       setChunk(filenames);
     }
   }, [selectedFiles]);
-
   const generateUniqueFilename = (originalFilename, chunkIndex) => {
     const fileExtension = originalFilename.split(".").pop(); // Get the file extension
     return `${originalFilename}_${chunkIndex}.${fileExtension}`;
@@ -185,6 +184,7 @@ const File = () => {
     formData.append("folderName", folder_name);
     formData.append("fileSize", selectedFiles && selectedFiles[0]["size"]);
     formData.append("uploadFile", true);
+    formData.append("fileName", selectedFiles && selectedFiles[0]["name"]);
     // You can replace this with your server endpoint for handling file chunks
     axios
       .post(REACT_APP_API_URL, formData, {
@@ -211,7 +211,6 @@ const File = () => {
         formD.append("_session", session);
         formD.append("chunkIndex", chunkIndex);
         formD.append("totalChunks", totalChunks);
-        // document.getElementById("load").style.display = "block";
         setmodal_center(!modal_center);
 
         axios
@@ -219,7 +218,6 @@ const File = () => {
           .then((res) => {
             if (res.isuploaded == true) {
               setmodal_center(false);
-              // document.getElementById("load").style.display = "none";
               setselectedFiles([]);
             }
           })
@@ -228,19 +226,11 @@ const File = () => {
           });
         if (response.lastupload == true) {
           setLoading(false);
-          // Swal.fire({
-          //   icon: "success",
-          //   title: "Successfully Uploaded",
-          // });
-          // setselectedFiles([]);
           setEnble(true);
           setUploading(false);
         }
-        // console.log(response);
-        // setUploading(true)
       })
       .catch((error) => {
-        // console.log(error);
       });
   };
   const startUpload = () => {

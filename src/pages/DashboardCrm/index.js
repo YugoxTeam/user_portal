@@ -10,29 +10,34 @@ import SalesForecast from './SalesForecast';
 import UpcomingActivities from './UpcomingActivities';
 import Widgets from './Widgets';
 import { useEffect } from 'react';
+import UploadHistory from '../FileUploader/UploadHistory';
 const DashboardCrm = () => {
     document.title="Dashboard";
     return (
         <React.Fragment>
             <div className="page-content">
                 <Container fluid>  
-                    <BreadCrumb title="CRM" pageTitle="Dashboards" />
+                    {/* <BreadCrumb title="CRM" pageTitle="Dashboards" /> */}
                     <Row>
                         <Widgets />
-                    </Row>
+                    </Row>  
                     <Row>
+                        <UploadHistory/>
+                    </Row>
+
+                    {/* <Row>
                         <SalesForecast />
                         <DealType />
                         <BalanceOverview />
-                    </Row>
-                    <Row>
+                    </Row> */}
+                    {/* <Row>
                         <DealsStatus />
                         <MyTasks />
                     </Row>
                     <Row>
                         <UpcomingActivities />
                         <ClosingDeals />
-                    </Row>
+                    </Row> */}
                 </Container>
             </div>
         </React.Fragment>

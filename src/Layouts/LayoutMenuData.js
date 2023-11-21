@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { decryptData } from "../pages/Authentication/DecryptionFunc";
-import { useSelector } from "react-redux";
 const Navdata = () => {
   const history = useNavigate();
   //state data
@@ -34,7 +32,6 @@ const Navdata = () => {
   const [isMaps, setIsMaps] = useState(false);
   const [isMultiLevel, setIsMultiLevel] = useState(false);
   const [upload, setUpload] = useState(false);
-  const [uploadHistory, setUploadHistory] = useState(false);
 
   const [iscurrentState, setIscurrentState] = useState("Dashboard");
 
@@ -143,9 +140,6 @@ const Navdata = () => {
     if (iscurrentState !== "FileUpload") {
       setUpload(false);
     }
-    if (iscurrentState !== "UploadHistory") {
-      setUploadHistory(false);
-    }
   }, [
     history,
     iscurrentState,
@@ -177,21 +171,8 @@ const Navdata = () => {
     isMaps,
     isMultiLevel,
     upload,
-    uploadHistory,
   ]);
-  // const asetRole = JSON.parse(decryptData("role"));
-  const asetRole = localStorage.getItem("role");
-  const dynamicValue1 = "Resource = Marketing Collateral";
-  const dynamicValue2 = "Ridge Academy = Ridge Academy";
-  const dynamicValue3 = "Software Download = Software Download";
-  const dynamicValue4 = "Partnership = Partnership and Programs";
-  const encodedValue1 = encodeURIComponent(dynamicValue1);
-  const encodedValue2 = encodeURIComponent(dynamicValue2);
-  const encodedValue3 = encodeURIComponent(dynamicValue3);
-  const encodedValue4 = encodeURIComponent(dynamicValue4);
-  // console.log(encodedValue);
-  //**partner menu */
-  const partnersMenu = [
+  const Menu = [
     {
       label: "Menu",
       isHeader: true,
@@ -216,52 +197,7 @@ const Navdata = () => {
         setIscurrentState("FileUpload");
       },
     },
-    {
-      id: "uploadHistory",
-      label: "Upload History",
-      icon: "ri-history-line",
-      link: "/upload-history",
-      click: function (e) {
-        e.preventDefault();
-        setIscurrentState("UploadHistory");
-      },
-    },
   ];
-
-  //**end user menu */
-  const endUserMenu = [
-    {
-      label: "Menu",
-      isHeader: true,
-    },
-    {
-      id: "isdashboard",
-      label: "Dashboard",
-      icon: "ri-dashboard-fill",
-      link: "/dashboard",
-      click: function (e) {
-        e.preventDefault();
-        setIscurrentState("Dashboard");
-      },
-    },
-  ];
-
-  // let menu = null;
-  // switch (asetRole) {
-  //   case "Partner":
-  //     menu = partnersMenu;
-  //     break;
-  //   // case "Employee and Portal Admin":
-  //   //   menu = adminMenuItem;
-  //   //   break;
-  //   // case "Employee":
-  //   //   menu = employeeMenuItems;
-  //   //   break;
-
-  //   case "End-User":
-  //     menu = endUserMenu;
-  //     break;
-  // }
-  return <React.Fragment>{partnersMenu}</React.Fragment>;
+  return <React.Fragment>{Menu}</React.Fragment>;
 };
 export default Navdata;
