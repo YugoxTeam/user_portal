@@ -1,7 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 
-
 //AuthenticationInner pages
 import BasicSignIn from "../pages/AuthenticationInner/Login/BasicSignIn";
 import CoverSignIn from "../pages/AuthenticationInner/Login/CoverSignIn";
@@ -40,15 +39,12 @@ import Logout from "../pages/Authentication/Logout";
 import Register from "../pages/Authentication/Register";
 import Dashboard from "../pages/DashboardCrm";
 import File from "../pages/FileUploader/File";
-import UploadHisPagination from "../pages/FileUploader/UploadHisPagination";
 // User Profile
 const authProtectedRoutes = [
   //components
 
-  { path: "/dashboard", component: <Dashboard/> },
+  { path: "/dashboard", component: <Dashboard /> },
   { path: "/upload", component: <File /> },
-  { path: "/upload1", component: <UploadHisPagination /> },
-
   { path: "/pages-profile-settings", component: <Settings /> },
   {
     path: "/",

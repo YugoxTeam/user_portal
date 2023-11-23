@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import {
+  Badge,
   Card,
   CardBody,
   CardHeader,
@@ -11,6 +12,9 @@ import {
   Row,
 } from "reactstrap";
 import { Link } from "react-router-dom";
+import moment from "moment/moment";
+import Loader from "../../Components/Common/Loader";
+import UploadHisPagination from "./UploadHisPagination";
 function UploadHistory() {
   const { REACT_APP_API_URL } = process.env;
   const [data, setData] = useState([]);
@@ -27,7 +31,6 @@ function UploadHistory() {
       .post(REACT_APP_API_URL, formD)
       .then((res) => {
         setData(res);
-        // console.log(res);
       })
       .catch((err) => {
         console.log(err);
@@ -46,7 +49,6 @@ function UploadHistory() {
       .post(REACT_APP_API_URL, formdata)
       .then((res) => {
         setChunkData(res);
-        // console.log(res);
       })
       .catch((err) => {
         console.log(err);
@@ -64,61 +66,79 @@ function UploadHistory() {
   }
   return (
     <React.Fragment>
-      <div className="page-content">
-        <Container fluid>
-          <Row>
-            <Col>
-              <Card lg={12}>
-                <CardHeader className="align-items-center d-flex">
-                  <h4 className="card-title mb-0 flex-grow-1">
-                    Import History
-                  </h4>
-                </CardHeader>
+      <Col>
+        <Card lg={12}>
+          <CardHeader className="align-items-center d-flex">
+            <h4 className="card-title mb-0 flex-grow-1">Import History</h4>
+          </CardHeader>
 
-                <CardBody>
-                  <div className="table-responsive table-card">
-                    <table className="table table-borderless table-hover table-nowrap align-middle mb-0">
-                      <thead className="table-light">
-                        <tr className="text-muted">
-                          <th scope="col">File Name</th>
-                          <th scope="col">Total Data</th>
-                          <th scope="col">Created Date</th>
-                          <th scope="col">Status</th>
-                          <th scope="col">Action</th>
-                        </tr>
-                      </thead>
+          <CardBody>
+            <div className="table-responsive table-card">
+              <table className="table table-borderless table-hover table-nowrap align-middle mb-0">
+                <thead className="table-light">
+                  <tr className="text-muted">
+                    <th scope="col">File Name</th>
+                    <th scope="col">Total Data</th>
+                    <th scope="col">Created Date</th>
+                    <th scope="col">Completed Time</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Action</th>
+                  </tr>
+                </thead>
 
-                      <tbody>
-                        {(data || []).map((item, index) => (
-                          <tr key={index}>
-                            <td>{item.storename}</td>
-                            <td>{item.total_data}</td>
-                            <td>{item.created_at?.split(" ")[0]}</td>
-                            <td>
+                <tbody>
+                  {data && data.length > 0 ? (
+                    (data || []).map((item, index) => {
+                      const dateTime = moment(item.complete_at);
+                      const formattedDateTime = dateTime.format(
+                        "YYYY-MM-DD h:mm:ss a"
+                      );
+                      return (
+                        <tr key={index}>
+                          <td>{item.storename}</td>
+                          <td>{item.total_data}</td>
+                          <td>{item.created_at?.split(" ")[0]}</td>
+                          <td>
+                            {item.complete_at == null
+                              ? "-"
+                              : formattedDateTime.split(" ")[1] +
+                                " " +
+                                formattedDateTime.split(" ")[2]}
+                          </td>
+                          <td>
+                            <Badge
+                              color={
+                                item.is_complete == "0" ? "warning" : "success"
+                              }
+                            >
                               {item.is_complete == "0"
                                 ? "In Progress"
                                 : "Completed"}
-                            </td>
-                            <td>
-                              <i
-                                className="ri-eye-fill align-middle"
-                                onClick={() =>
-                                  tog_center(item.foldername, item.storename)
-                                }
-                                style={{ cursor: "pointer" }}
-                              ></i>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardBody>
-              </Card>
-            </Col>
-          </Row>
-        </Container>
-      </div>
+                            </Badge>
+                          </td>
+                          <td>
+                            <i
+                              className="ri-eye-fill align-middle"
+                              onClick={() =>
+                                tog_center(item.foldername, item.storename)
+                              }
+                              style={{ cursor: "pointer" }}
+                            ></i>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td>No record found</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </CardBody>
+        </Card>
+      </Col>
       <Modal
         isOpen={modal_center}
         toggle={() => {
@@ -134,60 +154,12 @@ function UploadHistory() {
                 {folderName.file_Name} Sub Files
               </h4>
             </CardHeader>
-            <CardBody>
-              <div className="table-responsive table-card">
-                <table className="table table-borderless table-hover table-nowrap align-middle mb-0">
-                  <thead className="table-light">
-                    <tr className="text-muted">
-                      <th scope="col">
-                        File Name
-                      </th>
-                      <th className="text-center" scope="col">
-                        Total Data
-                      </th>
-                      <th className="text-center" scope="col">
-                        Created Date
-                      </th>
-                      <th className="text-center" scope="col">
-                        Status
-                      </th>
-                      <th className="text-center" scope="col">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
 
-                  <tbody>
-                    {(chunkData || []).map((item, index) => (
-                      <tr key={index}>
-                        <td>{item.storename}</td>
-                        <td className="text-center">{item.total_data_count}</td>
-                        <td className="text-center">
-                          {item.is_complete == "0"
-                            ? "-"
-                            : item.complete_at?.split(" ")[0]}
-                        </td>
-                        <td className="text-center">
-                          {item.is_complete == "0"
-                            ? "In Progress"
-                            : "Completed"}
-                        </td>
-                        <td className="text-center">
-                          <Link
-                            to={`${REACT_APP_API_URL}?dlc=true&id=${item.id}`}
-                          >
-                            <i
-                              className="ri-download-2-line"
-                              style={{ cursor: "pointer" }}
-                            />
-                          </Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardBody>
+            {chunkData && chunkData.length > 0 ? (
+              <UploadHisPagination chunkData={chunkData} />
+            ) : (
+              <Loader />
+            )}
           </Card>
         </ModalBody>
       </Modal>

@@ -8,7 +8,7 @@ const Widgets = () => {
   const { REACT_APP_API_URL } = process.env;
 
   const [data, setData] = useState([]);
-  useEffect(() => {
+  const fetch = () => {
     const fomdata = new FormData();
     fomdata.append("datacounts", true);
     axios
@@ -20,6 +20,11 @@ const Widgets = () => {
       .catch((err) => {
         console.log(err);
       });
+  };
+  useEffect(() => {
+    fetch();
+    const interval = setInterval(fetch, 10000);
+    return () => clearInterval(interval);
   }, []);
   //   console.log(typeof(data));
 
@@ -39,14 +44,23 @@ const Widgets = () => {
                           {item.label}
                           <i
                             className={
-                              "ri-arrow-up-circle-line text-success" + " fs-18 float-end align-middle"
+                              "ri-arrow-up-circle-line text-success" +
+                              " fs-18 float-end align-middle"
                             }
                           ></i>
                         </h5>
                         <div className="d-flex align-items-center">
                           <div className="flex-shrink-0">
                             <i
-                              className={item.label =="Total Counts"?"ri-numbers-line"+ " display-6 text-muted":item.label=="Total Files"?"ri-file-excel-2-line"+ " display-6 text-muted":"ri-file-damage-line"+" display-6 text-muted" }
+                              className={
+                                item.label == "Total Counts"
+                                  ? "ri-numbers-line" + " display-6 text-muted"
+                                  : item.label == "Total Files"
+                                  ? "ri-file-excel-2-line" +
+                                    " display-6 text-muted"
+                                  : "ri-file-damage-line" +
+                                    " display-6 text-muted"
+                              }
                             ></i>
                           </div>
                           <div className="flex-grow-1 ms-3">
@@ -56,7 +70,7 @@ const Widgets = () => {
                                   start={0}
                                   // prefix={item.prefix}
                                   // suffix={item.suffix}
-                                //   separator={item.separator}
+                                  //   separator={item.separator}
                                   end={item.count}
                                   decimals={item.decimals}
                                   duration={4}

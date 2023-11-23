@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
+  Badge,
   Button,
   Card,
   CardBody,
@@ -230,8 +231,7 @@ const File = () => {
           setUploading(false);
         }
       })
-      .catch((error) => {
-      });
+      .catch((error) => {});
   };
   const startUpload = () => {
     setLoading(true);
@@ -267,12 +267,15 @@ const File = () => {
             };
           })
         );
+        const updatedLines = lines.map((line, index) => {
+          return index === 0 ? Object.values(newCSVHeader).join(",") : line;
+        });
         for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
           const startLine = chunkIndex * linesPerChunk;
           // const end = Math.min(start + chunkSize, fileSize);
           const endLine = startLine + linesPerChunk;
           // const chunk = selectedFiles[0].slice(start, end);
-          const chunkLines = lines.slice(startLine, endLine);
+          const chunkLines = updatedLines.slice(startLine, endLine);
           const chunkContent =
             chunkIndex === 0
               ? chunkLines.join("\n")
@@ -345,12 +348,15 @@ const File = () => {
           <Row>
             <Col lg={12}>
               <Card>
-                <CardHeader className="card-header">
-                  <h4 className="card-title mb-0">
+                <CardHeader className="card-header d-flex align-items-center">
+                  <h4 className="card-title mb-0 me-2">
                     {selectedFiles && selectedFiles.length > 0
                       ? "Field Mapping"
                       : "Upload Documents"}
-                  </h4>
+                  </h4>{" "}
+                  <Badge className="badge-label" color="dark">
+                    Please Fill All The Mandatory Fields.
+                  </Badge>
                 </CardHeader>
                 <CardBody>
                   {selectedFiles && selectedFiles.length > 0 ? (

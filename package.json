@@ -23,6 +23,7 @@
     "i18next": "^22.4.9",
     "i18next-browser-languagedetector": "^7.0.1",
     "js-md5": "^0.8.3",
+    "moment": "^2.29.4",
     "prismjs": "^1.29.0",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.0",
@@ -55,7 +56,7 @@
     "yup": "^0.32.11"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "set HTTPS=true&&react-scripts start",
     "build": "react-scripts build --href=./fileupload/",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
